@@ -6,6 +6,11 @@ export const API_ENDPOINTS = {
     ME: `${BASE_URL}/app/v1/user/me`,
     RESET_PASSWORD: `${BASE_URL}/app/v1/user/reset-password`,
     RESET_PASSWORD_CONFIRM: `${BASE_URL}/app/v1/user/reset-password/confirm`,
+    UPDATE_PHOTO: `${BASE_URL}/app/v1/user/me/photo`,
+    UPDATE_PROFILE: `${BASE_URL}/app/v1/user/me`,
+    PSYCHOLOGIST_REQUESTS: `${BASE_URL}/app/v1/user/psychologist-request`,
+    ACCEPT_REQUEST: (requestId: number) => `${BASE_URL}/app/v1/user/psychologist-request/${requestId}/accept`,
+    REJECT_REQUEST: (requestId: number) => `${BASE_URL}/app/v1/user/psychologist-request/${requestId}/reject`,
 };
 
 export default API_ENDPOINTS;
