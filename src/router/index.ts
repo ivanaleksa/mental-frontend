@@ -5,6 +5,11 @@ import API_ENDPOINTS from '../config/api';
 
 const routes = [
     {
+        path: '/',
+        name: 'Home',
+        component: () => import('../views/Home.vue'),
+    },
+    {
         path: '/register',
         name: 'Register',
         component: Register,
