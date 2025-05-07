@@ -19,12 +19,18 @@
             <button class="action-button logout" @click="logout">Выйти</button>
           </div>
           <div class="profile-details">
-            <button @click="openUploadDialog" class="photo-button">
-              <img :src="userData.client_photo ? `http://127.0.0.1:8000/public/user_photos/${userData.client_photo}` : 'https://via.placeholder.com/150'" alt="Profile Photo" class="profile-photo" />
-            </button>
+            <div class="photo-container">
+              <button @click="openUploadDialog" class="photo-button">
+                <div v-if="!userData.client_photo || userData.client_photo === 'none'" class="photo-placeholder">
+                  Ваше фото здесь
+                </div>
+                <img v-else :src="`http://127.0.0.1:8000/public/user_photos/${userData.client_photo}`" alt="Profile Photo" class="profile-photo" />
+              </button>
+              <p class="photo-hint">Нажмите, чтобы изменить фото</p>
+            </div>
             <div v-if="showUploadDialog" class="modal">
               <div class="modal-content">
-                <input type="file" @change="handleFileUpload" ref="fileInput" />
+                <input type="file" @change="handleFileUpload" accept="image/*" ref="fileInput" />
                 <button @click="closeUploadDialog">Закрыть</button>
               </div>
             </div>
@@ -79,7 +85,7 @@
             <input v-model="passwordData.new_password" type="password" placeholder="Новый пароль" />
             <input v-model="passwordData.confirm_password" type="password" placeholder="Подтвердите пароль" />
             <button @click="changePassword">Сохранить</button>
-            <button @click="closeChangePasswordDialog">Закрыть</button>
+            <button @click="closeChangePasswordDialog" style="background: #1a1a1a">Закрыть</button>
             <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
             <p v-if="successMessage" class="success">{{ successMessage }}</p>
           </div>
@@ -487,16 +493,42 @@ export default defineComponent({
   gap: 2rem;
 }
 
+.photo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .photo-button {
   border: none;
   background: none;
   cursor: pointer;
 }
 
+.photo-placeholder {
+  width: 250px;
+  height: 300px;
+  background: linear-gradient(135deg, #00FF00, #00FFFF);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.2rem;
+  text-align: center;
+  padding: 1rem;
+}
+
 .profile-photo {
   width: 250px;
   height: 300px;
   object-fit: cover;
+}
+
+.photo-hint {
+  font-size: 0.9rem;
+  color: #666;
+  opacity: 0.7;
+  margin-top: 0.5rem;
 }
 
 .info-section {
