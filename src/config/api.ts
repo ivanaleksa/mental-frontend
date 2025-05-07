@@ -11,6 +11,9 @@ export const API_ENDPOINTS = {
     PSYCHOLOGIST_REQUESTS: `${BASE_URL}/app/v1/user/psychologist-request`,
     ACCEPT_REQUEST: (requestId: number) => `${BASE_URL}/app/v1/user/psychologist-request/${requestId}/accept`,
     REJECT_REQUEST: (requestId: number) => `${BASE_URL}/app/v1/user/psychologist-request/${requestId}/reject`,
+    CHANGE_PASSWORD: `${BASE_URL}/app/v1/user/change-password`,
+    CLIENT_REQUEST_STATUS: `${BASE_URL}/app/v1/user/client-request-status`,
+    APPLY_FOR_PSYCHOLOGIST: `${BASE_URL}/app/v1/user/apply-for-psychologist`,
 };
 
 export default API_ENDPOINTS;

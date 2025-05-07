@@ -11,8 +11,10 @@
       <div class="main-content">
         <div class="profile-header">
           <div class="actions">
-            <button class="action-button" @click="$router.push('/forgot-password')">Сменить пароль</button>
-            <button v-if="userData.user_type === 'клиент'" class="action-button" @click="alert('Подать документы')">Подать документы</button>
+            <button class="action-button" @click="openChangePasswordDialog">Сменить пароль</button>
+            <button v-if="userData.user_type === 'клиент' && !requestStatus.has_application" class="action-button" @click="openApplyDialog">Подать документы</button>
+            <p v-else-if="userData.user_type === 'клиент' && requestStatus.has_application && requestStatus.status === 'ожидание'" class="status-message" style="color: #333">Ожидание проверки документа</p>
+            <button v-else-if="userData.user_type === 'клиент' && requestStatus.has_application && requestStatus.status === 'отвергнут'" class="action-button rejected" @click="openRejectedApplyDialog">{{ requestStatus.rejection_reason || 'Отвергнуто' }}</button>
             <button v-else class="action-button" @click="alert('Выйти из статуса психолога')">Выйти из статуса психолога</button>
             <button class="action-button logout" @click="logout">Выйти</button>
           </div>
@@ -45,7 +47,7 @@
         </div>
         <div class="requests-section">
           <h2>Заявки от психологов</h2>
-          <div v-if="userData.user_type === 'клиент' && psychologistRequests.length" class="requests-list"">
+          <div v-if="userData.user_type === 'клиент' && psychologistRequests.length" class="requests-list">
             <div v-for="request in psychologistRequests" :key="request.request_id" class="request-item">
               <img :src="request.psychologist_photo ? `http://127.0.0.1:8000/public/user_photos/${request.psychologist_photo}` : 'https://via.placeholder.com/50'" alt="Psychologist Photo" class="request-photo" />
               <div>
@@ -68,6 +70,40 @@
             </div>
           </div>
           <p v-else>Нет заявок</p>
+        </div>
+        <!-- Модальное окно для смены пароля -->
+        <div v-if="showChangePasswordDialog" class="modal">
+          <div class="modal-content">
+            <h3>Смена пароля</h3>
+            <input v-model="passwordData.old_password" type="password" placeholder="Старый пароль" />
+            <input v-model="passwordData.new_password" type="password" placeholder="Новый пароль" />
+            <input v-model="passwordData.confirm_password" type="password" placeholder="Подтвердите пароль" />
+            <button @click="changePassword">Сохранить</button>
+            <button @click="closeChangePasswordDialog">Закрыть</button>
+            <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+            <p v-if="successMessage" class="success">{{ successMessage }}</p>
+          </div>
+        </div>
+        <!-- Модальное окно для подачи документов -->
+        <div v-if="showApplyDialog" class="modal">
+          <div class="modal-content">
+            <h3>Подать документы</h3>
+            <input type="file" @change="handleApplyUpload" ref="applyFileInput" />
+            <button @click="submitApplication">Сохранить</button>
+            <button @click="closeApplyDialog">Закрыть</button>
+            <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+          </div>
+        </div>
+        <!-- Модальное окно для повторной подачи документов -->
+        <div v-if="showRejectedApplyDialog" class="modal">
+          <div class="modal-content">
+            <h3>Повторная подача документов</h3>
+            <p>Причина отклонения: {{ requestStatus.rejection_reason }}</p>
+            <input type="file" @change="handleRejectedApplyUpload" ref="rejectedApplyFileInput" />
+            <button @click="submitRejectedApplication">Сохранить</button>
+            <button @click="closeRejectedApplyDialog">Закрыть</button>
+            <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+          </div>
         </div>
       </div>
     </div>
@@ -104,12 +140,29 @@ export default defineComponent({
       },
       showUploadDialog: false,
       showPdf: false,
+      showChangePasswordDialog: false,
+      showApplyDialog: false,
+      showRejectedApplyDialog: false,
+      passwordData: {
+        user_id: 0,
+        user_type: 'клиент',
+        old_password: '',
+        new_password: '',
+        confirm_password: '',
+      },
+      requestStatus: {
+        has_application: false,
+        status: null,
+        rejection_reason: null,
+      },
       errorMessage: '',
+      successMessage: '',
     };
   },
   mounted() {
     this.fetchUserData();
     this.fetchPsychologistRequests();
+    this.fetchRequestStatus();
   },
   methods: {
     async fetchUserData() {
@@ -120,6 +173,8 @@ export default defineComponent({
             headers: { Authorization: `Bearer ${jwtToken}` },
           });
           this.userData = response.data;
+          this.passwordData.user_id = this.userData.user_id;
+          this.passwordData.user_type = this.userData.user_type;
         } catch (error) {
           this.errorMessage = 'Ошибка загрузки данных пользователя';
           console.error(error);
@@ -136,6 +191,20 @@ export default defineComponent({
           this.psychologistRequests = response.data;
         } catch (error) {
           this.errorMessage = 'Ошибка загрузки заявок';
+          console.error(error);
+        }
+      }
+    },
+    async fetchRequestStatus() {
+      const jwtToken = document.cookie.split('; ').find(row => row.startsWith('jwt_token='))?.split('=')[1];
+      if (jwtToken && this.userData.user_type === 'клиент') {
+        try {
+          const response = await axios.get(API_ENDPOINTS.CLIENT_REQUEST_STATUS, {
+            headers: { Authorization: `Bearer ${jwtToken}` },
+          });
+          this.requestStatus = response.data;
+        } catch (error) {
+          this.errorMessage = 'Ошибка проверки статуса заявки';
           console.error(error);
         }
       }
@@ -160,7 +229,7 @@ export default defineComponent({
             await axios.patch(API_ENDPOINTS.UPDATE_PHOTO, formData, {
               headers: { Authorization: `Bearer ${jwtToken}`, 'Content-Type': 'multipart/form-data' },
             });
-            this.fetchUserData(); // Обновляем фото
+            this.fetchUserData();
             this.closeUploadDialog();
           } catch (error) {
             this.errorMessage = 'Ошибка загрузки фото: ' + (error.response?.data?.detail || 'Попробуйте снова');
@@ -198,7 +267,7 @@ export default defineComponent({
             headers: { Authorization: `Bearer ${jwtToken}` },
           });
           this.fetchPsychologistRequests();
-          window.location.reload(); // Обновляем страницу
+          window.location.reload();
         } catch (error) {
           this.errorMessage = 'Ошибка принятия заявки: ' + (error.response?.data?.detail || 'Попробуйте снова');
           console.error(error);
@@ -213,7 +282,7 @@ export default defineComponent({
             headers: { Authorization: `Bearer ${jwtToken}` },
           });
           this.fetchPsychologistRequests();
-          window.location.reload(); // Обновляем страницу
+          window.location.reload();
         } catch (error) {
           this.errorMessage = 'Ошибка отклонения заявки: ' + (error.response?.data?.detail || 'Попробуйте снова');
           console.error(error);
@@ -230,6 +299,121 @@ export default defineComponent({
       document.cookie = 'jwt_token=; Max-Age=0; path=/';
       window.location.reload();
     },
+    openChangePasswordDialog() {
+      this.showChangePasswordDialog = true;
+      this.passwordData.old_password = '';
+      this.passwordData.new_password = '';
+      this.passwordData.confirm_password = '';
+      this.errorMessage = '';
+      this.successMessage = '';
+    },
+    closeChangePasswordDialog() {
+      this.showChangePasswordDialog = false;
+    },
+    async changePassword() {
+      if (this.passwordData.new_password !== this.passwordData.confirm_password) {
+        this.errorMessage = 'Новый пароль и подтверждение не совпадают';
+        return;
+      }
+      const jwtToken = document.cookie.split('; ').find(row => row.startsWith('jwt_token='))?.split('=')[1];
+      if (jwtToken) {
+        try {
+          const response = await axios.post(API_ENDPOINTS.CHANGE_PASSWORD, {
+            user_id: this.passwordData.user_id,
+            user_type: this.passwordData.user_type,
+            old_password: this.passwordData.old_password,
+            new_password: this.passwordData.new_password,
+          }, {
+            headers: { Authorization: `Bearer ${jwtToken}` },
+          });
+          this.userData = response.data;
+          document.cookie = `jwt_token=${response.data.jwt_token}; path=/`;
+          this.successMessage = 'Пароль успешно изменён';
+          this.errorMessage = '';
+          this.closeChangePasswordDialog();
+        } catch (error) {
+          this.errorMessage = 'Ошибка смены пароля: ' + (error.response?.data?.detail || 'Попробуйте снова');
+          this.successMessage = '';
+          console.error(error);
+        }
+      }
+    },
+    openApplyDialog() {
+      this.showApplyDialog = true;
+      (this.$refs.applyFileInput as HTMLInputElement).value = '';
+      this.errorMessage = '';
+    },
+    closeApplyDialog() {
+      this.showApplyDialog = false;
+    },
+    openRejectedApplyDialog() {
+      this.showRejectedApplyDialog = true;
+      (this.$refs.rejectedApplyFileInput as HTMLInputElement).value = '';
+      this.errorMessage = '';
+    },
+    closeRejectedApplyDialog() {
+      this.showRejectedApplyDialog = false;
+    },
+    async handleApplyUpload(event: Event) {
+      const target = event.target as HTMLInputElement;
+      if (target.files && target.files[0]) {
+        this.applyFile = target.files[0];
+      }
+    },
+    async submitApplication() {
+      if (!this.applyFile) {
+        this.errorMessage = 'Выберите файл для отправки';
+        return;
+      }
+      const formData = new FormData();
+      formData.append('document', this.applyFile);
+
+      const jwtToken = document.cookie.split('; ').find(row => row.startsWith('jwt_token='))?.split('=')[1];
+      if (jwtToken) {
+        try {
+          const response = await axios.post(API_ENDPOINTS.APPLY_FOR_PSYCHOLOGIST, formData, {
+            headers: { Authorization: `Bearer ${jwtToken}`, 'Content-Type': 'multipart/form-data' },
+          });
+          this.requestStatus = response.data;
+          this.fetchRequestStatus();
+          this.closeApplyDialog();
+          this.errorMessage = '';
+        } catch (error) {
+          this.errorMessage = 'Ошибка подачи заявки: ' + (error.response?.data?.detail || 'Попробуйте снова');
+          console.error(error);
+        }
+      }
+    },
+    async handleRejectedApplyUpload(event: Event) {
+      const target = event.target as HTMLInputElement;
+      if (target.files && target.files[0]) {
+        this.rejectedApplyFile = target.files[0];
+      }
+    },
+    async submitRejectedApplication() {
+      if (!this.rejectedApplyFile) {
+        this.errorMessage = 'Выберите файл для отправки';
+        return;
+      }
+      const formData = new FormData();
+      formData.append('document', this.rejectedApplyFile);
+
+      const jwtToken = document.cookie.split('; ').find(row => row.startsWith('jwt_token='))?.split('=')[1];
+      if (jwtToken) {
+        try {
+          const response = await axios.post(API_ENDPOINTS.APPLY_FOR_PSYCHOLOGIST, formData, {
+            headers: { Authorization: `Bearer ${jwtToken}`, 'Content-Type': 'multipart/form-data' },
+          });
+          this.requestStatus = response.data;
+          this.fetchRequestStatus();
+          this.closeRejectedApplyDialog();
+          this.errorMessage = '';
+        } catch (error) {
+          this.errorMessage = 'Ошибка подачи заявки: ' + (error.response?.data?.detail || 'Попробуйте снова');
+          console.error(error);
+        }
+      }
+    },
   },
 });
 </script>
@@ -243,8 +427,6 @@ export default defineComponent({
 .title {
   font-size: 2rem;
   font-weight: bold;
-  -webkit-background-clip: text;
-  background-clip: text;
   color: #333;
   text-align: left;
   margin-bottom: 1rem;
@@ -313,18 +495,18 @@ export default defineComponent({
 
 .profile-photo {
   width: 250px;
-  height: 300px; /* Фиксированная высота, можно настроить под твои нужды */
-  object-fit: cover; /* Сохраняет пропорции изображения */
+  height: 300px;
+  object-fit: cover;
 }
 
 .info-section {
   flex: 1;
-  text-align: left; /* Выровнять текст слева */
+  text-align: left;
 }
 
 .info-section p {
   margin: 0.5rem 0;
-  color: #333; /* Убедимся, что текст виден */
+  color: #333;
 }
 
 .edit-hint {
@@ -374,6 +556,10 @@ export default defineComponent({
   background: linear-gradient(135deg, #FF0000, #FF4444);
 }
 
+.action-button.rejected {
+  background: linear-gradient(135deg, #FF8888, #FF4444);
+}
+
 .modal {
   position: fixed;
   top: 0;
@@ -393,6 +579,34 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  color: #333;
+}
+
+.modal-content input {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.modal-content button {
+  padding: 0.5rem;
+  background: linear-gradient(135deg, #00FF00, #00FFFF);
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+}
+
+.modal-content .error {
+  color: #FF4444;
+}
+
+.modal-content .success {
+  color: #00FF00;
 }
 
 .pdf-modal {
