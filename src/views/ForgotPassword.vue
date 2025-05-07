@@ -187,7 +187,6 @@ export default defineComponent({
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
 }
 
 .forgot-password-form {
