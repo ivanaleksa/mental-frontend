@@ -14,6 +14,8 @@ export const API_ENDPOINTS = {
     CHANGE_PASSWORD: `${BASE_URL}/app/v1/user/change-password`,
     CLIENT_REQUEST_STATUS: `${BASE_URL}/app/v1/user/client-request-status`,
     APPLY_FOR_PSYCHOLOGIST: `${BASE_URL}/app/v1/user/apply-for-psychologist`,
+    PSYCHOLOGISTS: `${BASE_URL}/app/v1/user/psychologists`,
+    REMOVE_PSYCHOLOGIST: (psychologistId: number | string) => `${BASE_URL}/app/v1/user/${psychologistId}`,
 };
 
 export default API_ENDPOINTS;
