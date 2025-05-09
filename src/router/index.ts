@@ -74,12 +74,14 @@ router.beforeEach(async (to, from, next) => {
         } catch (error) {
             console.error('ME Error:', error);
             document.cookie = 'jwt_token=; Max-Age=0; path=/';
-            next('/login');
+            if (to.path !== '/' && to.path !== '/forgot-password') {
+                next('/login');
+            }
             return;
         }
     }
 
-    if (to.path !== '/login' && to.path !== '/register') {
+    if (to.path !== '/' && to.path !== '/forgot-password' && to.path !== '/login' && to.path !== '/register') {
         next('/login');
     } else {
         next();

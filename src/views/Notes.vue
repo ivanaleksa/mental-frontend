@@ -34,9 +34,9 @@
               </div>
               <textarea v-model="currentNote.body" placeholder="Текст заметки" class="body-input"></textarea>
               <div class="note-actions">
-                <button @click="analyzeNote" class="action-button">Проанализировать</button>
+                <button @click="analyzeNote" class="action-button" style="background: linear-gradient(135deg, #00FF00, #00FFFF)">Проанализировать</button>
                 <button @click="openEmotionDialog" class="action-button">Ввести эмоции вручную</button>
-                <button @click="saveNote" class="action-button">Сохранить</button>
+                <button @click="saveNote" class="action-button" style="background: #00bf4d">Сохранить</button>
               </div>
             </div>
             <button v-else @click="createNewNote" class="action-button add">Добавить заметку</button>
@@ -446,7 +446,6 @@ export default defineComponent({
 
 .action-button {
   padding: 0.5rem;
-  background: linear-gradient(135deg, #00FF00, #00FFFF);
   border: none;
   border-radius: 5px;
   color: white;

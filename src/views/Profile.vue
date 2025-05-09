@@ -563,7 +563,7 @@ export default defineComponent({
 
 .edit-form button {
   padding: 0.5rem;
-  background: linear-gradient(135deg, #00FF00, #00FFFF);
+  background: #00bf4d;
   border: none;
   border-radius: 5px;
   color: white;
@@ -572,7 +572,7 @@ export default defineComponent({
 
 .action-button {
   padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #00FF00, #00FFFF);
+  background: #00bf4d;
   border: none;
   border-radius: 5px;
   color: white;
@@ -626,7 +626,7 @@ export default defineComponent({
 
 .modal-content button {
   padding: 0.5rem;
-  background: linear-gradient(135deg, #00FF00, #00FFFF);
+  background: #00bf4d;
   border: none;
   border-radius: 5px;
   color: white;
