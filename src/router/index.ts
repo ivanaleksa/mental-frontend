@@ -35,6 +35,11 @@ const routes = [
         component: () => import('../views/Psychologists.vue'),
     },
     {
+        path: '/notes',
+        name: 'Notes',
+        component: () => import('../views/Notes.vue')
+    },
+    {
         path: '/:pathMatch(.*)*',
         name: 'NotFound',
         component: () => import('../views/NotFound.vue'),
@@ -69,10 +74,12 @@ router.beforeEach(async (to, from, next) => {
         } catch (error) {
             console.error('ME Error:', error);
             document.cookie = 'jwt_token=; Max-Age=0; path=/';
+            next('/login');
+            return;
         }
     }
 
-    if (to.path === '/profile') {
+    if (to.path !== '/login' && to.path !== '/register') {
         next('/login');
     } else {
         next();
