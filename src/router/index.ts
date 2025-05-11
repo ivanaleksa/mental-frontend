@@ -40,6 +40,11 @@ const routes = [
         component: () => import('../views/Notes.vue')
     },
     {
+        path: '/email-confirmation',
+        name: 'EmailConfirmation',
+        component: () =>import('../views/EmailConfirmation.vue'),
+    },
+    {
         path: '/:pathMatch(.*)*',
         name: 'NotFound',
         component: () => import('../views/NotFound.vue'),
@@ -64,6 +69,15 @@ router.beforeEach(async (to, from, next) => {
             });
 
             if (response.data) {
+                if (!response.data.is_verified && to.path !== '/email-confirmation') {
+                    next('/email-confirmation');
+                    return;
+                }
+                if (response.data.is_verified && to.path === '/email-confirmation') {
+                    next('/profile');
+                    return;
+                }
+
                 if (to.path === '/login' || to.path === '/register') {
                     next('/profile');
                 } else {

@@ -22,6 +22,8 @@ export const API_ENDPOINTS = {
     NOTE_CREATE: `${BASE_URL}/app/v1/note/create`,
     NOTE_UPDATE: (noteId: number | string) => `${BASE_URL}/app/v1/note/update/${noteId}`,
     NOTE_DELETE: (noteId: number | string) => `${BASE_URL}/app/v1/note/delete/${noteId}`,
+    EMAIL_CONFIRM: `${BASE_URL}/app/v1/email/confirm`,
+    EMAIL_SEND_NEW: `${BASE_URL}/app/v1/email/send-new`
 };
 
 export default API_ENDPOINTS;
