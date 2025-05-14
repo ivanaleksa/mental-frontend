@@ -177,7 +177,6 @@ export default defineComponent({
           this.userData = response.data;
         } catch (error) {
           this.errorMessage = 'Ошибка загрузки данных пользователя';
-          console.error('Ошибка загрузки данных пользователя:', error);
         }
       }
     },
@@ -212,7 +211,6 @@ export default defineComponent({
       this.selectedNoteId = this.selectedNoteId === noteId ? null : noteId;
       if (this.selectedNoteId) {
         await this.fetchNoteDetails(noteId);
-        console.log('После выбора заметки currentNote:', this.currentNote);
       } else {
         this.currentNote = { note_id: -1, title: '', body: '', emotions: [], createdAt: '' };
       }
@@ -229,10 +227,8 @@ export default defineComponent({
             emotions: response.data.emotions || [],
             createdAt: response.data.createdAt || '',
           };
-          console.log('Данные заметки загружены:', this.currentNote);
         } catch (error) {
           this.errorMessage = 'Ошибка загрузки деталей заметки';
-          console.error('Ошибка загрузки деталей заметки:', error);
         }
       }
     },
@@ -264,7 +260,6 @@ export default defineComponent({
         } catch (error) {
           this.errorMessage = 'Ошибка сохранения заметки: ' + (error.response?.data?.detail || 'Попробуйте снова');
           this.showNotificationMessage(this.errorMessage, 'error');
-          console.error('Ошибка сохранения заметки:', error);
         }
       }
     },
@@ -304,7 +299,6 @@ export default defineComponent({
       return e ? e.color : '#000000';
     },
     openDeleteDialog(noteId: number) {
-      console.log('Открываем диалог удаления для noteId:', noteId);
       this.deleteNoteId = noteId;
       this.showDeleteDialog = true;
     },
@@ -317,7 +311,6 @@ export default defineComponent({
         const jwtToken = document.cookie.split('; ').find(row => row.startsWith('jwt_token='))?.split('=')[1];
         if (jwtToken) {
           try {
-            console.log('Отправляем запрос на удаление заметки:', this.deleteNoteId);
             await axios.delete(API_ENDPOINTS.NOTE_DELETE(this.deleteNoteId), { headers: { Authorization: `Bearer ${jwtToken}` } });
             this.notes = this.notes.filter(n => n.note_id !== this.deleteNoteId);
             if (this.selectedNoteId === this.deleteNoteId) {
@@ -328,7 +321,6 @@ export default defineComponent({
             this.closeDeleteDialog();
           } catch (error) {
             this.errorMessage = 'Ошибка удаления заметки: ' + (error.response?.data?.detail || 'Попробуйте снова');
-            console.error('Ошибка удаления заметки:', error);
           }
         }
       }
@@ -346,7 +338,6 @@ export default defineComponent({
           this.currentNote.emotions = response.data.emotions || [];
         } catch (error) {
           this.errorMessage = 'Ошибка анализа: ' + (error.response?.data?.detail || 'Попробуйте снова');
-          console.error('Ошибка анализа:', error);
         } finally {
           this.isLoading = false;
         }
