@@ -42,7 +42,12 @@ const routes = [
     {
         path: '/email-confirmation',
         name: 'EmailConfirmation',
-        component: () =>import('../views/EmailConfirmation.vue'),
+        component: () => import('../views/EmailConfirmation.vue'),
+    },
+    {
+        path: '/stats',
+        name: 'Stats',
+        component: () => import('../views/Stats.vue'),
     },
     {
         path: '/:pathMatch(.*)*',

@@ -197,10 +197,8 @@ export default defineComponent({
             body: note.body || '',
             emotions: note.emotions || [],
           }));
-          console.log('Заметки загружены:', this.notes);
         } catch (error) {
           this.errorMessage = 'Ошибка загрузки заметок';
-          console.error('Ошибка загрузки заметок:', error);
         }
       }
     },
