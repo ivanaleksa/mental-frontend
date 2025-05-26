@@ -12,7 +12,7 @@
         <div class="psychologists-list-section">
           <h2>Список психологов</h2>
           <div v-if="psychologists.length" class="psychologists-list">
-            <div v-for="(psychologist, index) in psychologists" :key="psychologist.request_id" class="psychologist-item" :class="{ expanded: expandedIndex === index }">
+            <div v-for="(psychologist, index) in psychologists" :key="psychologist.id" class="psychologist-item" :class="{ expanded: expandedIndex === index }">
               <div class="psychologist-summary" @click="toggleExpand(index)">
                 <p><strong>{{ psychologist.first_name }} {{ psychologist.last_name }}</strong> ({{ psychologist.login }})</p>
               </div>
@@ -25,7 +25,7 @@
                   <p><strong>Пол:</strong> {{ psychologist.sex }}</p>
                 </div>
               </div>
-              <button class="action-button delete" @click="removePsychologist(psychologist.request_id)">Удалить</button>
+              <button class="action-button delete" @click="removePsychologist(psychologist.psychologist_id)">Удалить</button>
             </div>
           </div>
           <p v-else>Нет психологов</p>
@@ -47,7 +47,7 @@ export default defineComponent({
       userData: {
         user_type: 'клиент',
       },
-      psychologists: [] as { request_id: number; login: string; first_name: string; last_name: string; sex: string; psychologist_photo?: string }[],
+      psychologists: [] as { psychologist_id: number; login: string; first_name: string; last_name: string; sex: string; psychologist_photo?: string }[],
       expandedIndex: null as number | null,
       errorMessage: '',
     };
@@ -88,11 +88,11 @@ export default defineComponent({
     toggleExpand(index: number) {
       this.expandedIndex = this.expandedIndex === index ? null : index;
     },
-    async removePsychologist(requestId: number) {
+    async removePsychologist(psychologistId: number) {
       const jwtToken = document.cookie.split('; ').find(row => row.startsWith('jwt_token='))?.split('=')[1];
       if (jwtToken) {
         try {
-          await axios.delete(API_ENDPOINTS.REMOVE_PSYCHOLOGIST(requestId), {
+          await axios.delete(API_ENDPOINTS.REMOVE_PSYCHOLOGIST(psychologistId), {
             headers: { Authorization: `Bearer ${jwtToken}` },
           });
           this.fetchPsychologists();

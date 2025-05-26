@@ -4,9 +4,9 @@
     <div class="profile-content">
       <div class="sidebar">
         <router-link to="/profile" class="sidebar-item active">Профиль</router-link>
-        <router-link to="/notes" class="sidebar-item">Управление записками</router-link>
+        <router-link v-if="userData.user_type === 'клиент'" to="/notes" class="sidebar-item">Управление записками</router-link>
         <router-link v-if="userData.user_type === 'клиент'" to="/stats" class="sidebar-item">Статистика</router-link>
-        <router-link to="/psychologists" class="sidebar-item">Список психологов</router-link>
+        <router-link v-if="userData.user_type === 'клиент'" to="/psychologists" class="sidebar-item">Список психологов</router-link>
       </div>
       <div class="main-content">
         <div class="profile-header">
@@ -194,7 +194,7 @@ export default defineComponent({
           const response = await axios.get(API_ENDPOINTS.PSYCHOLOGIST_REQUESTS, {
             headers: { Authorization: `Bearer ${jwtToken}` },
           });
-          this.psychologistRequests = response.data;
+          this.psychologistRequests = response.data.requests;
         } catch (error) {
           this.errorMessage = 'Ошибка загрузки заявок';
           console.error(error);
@@ -269,10 +269,10 @@ export default defineComponent({
       const jwtToken = document.cookie.split('; ').find(row => row.startsWith('jwt_token='))?.split('=')[1];
       if (jwtToken) {
         try {
-          await axios.post(API_ENDPOINTS.ACCEPT_REQUEST(requestId), {}, {
+          await axios.patch(API_ENDPOINTS.ACCEPT_REQUEST(requestId), {}, {
             headers: { Authorization: `Bearer ${jwtToken}` },
           });
-          this.fetchPsychologistRequests();
+          await this.fetchPsychologistRequests();
           window.location.reload();
         } catch (error) {
           this.errorMessage = 'Ошибка принятия заявки: ' + (error.response?.data?.detail || 'Попробуйте снова');
@@ -284,7 +284,7 @@ export default defineComponent({
       const jwtToken = document.cookie.split('; ').find(row => row.startsWith('jwt_token='))?.split('=')[1];
       if (jwtToken) {
         try {
-          await axios.post(API_ENDPOINTS.REJECT_REQUEST(requestId), {}, {
+          await axios.patch(API_ENDPOINTS.REJECT_REQUEST(requestId), {}, {
             headers: { Authorization: `Bearer ${jwtToken}` },
           });
           this.fetchPsychologistRequests();
