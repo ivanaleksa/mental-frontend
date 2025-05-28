@@ -60,7 +60,7 @@ export default defineComponent({
         });
         const { jwt_token } = response.data;
         document.cookie = `jwt_token=${jwt_token}; path=/; max-age=86400`;
-        router.push('/admin/dashboard');
+        router.push('/admin/clients');
       } catch (error) {
         if (error.response && error.response.data.detail) {
           errorMessage.value = error.response.data.detail;

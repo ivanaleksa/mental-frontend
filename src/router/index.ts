@@ -60,9 +60,9 @@ const routes = [
         component: () => import('../views/AdminLogin.vue'),
     },
     {
-        path: '/admin/dashboard',
-        name: 'Dashboard',
-        component: () => import('../views/AdminDashboard.vue'),
+        path: '/admin/clients',
+        name: 'AdminClients',
+        component: () => import('../views/AdminClients.vue'),
     },
     {
         path: '/:pathMatch(.*)*',
@@ -91,7 +91,7 @@ router.beforeEach(async (to, from, next) => {
 
         if (response.data) {
           if (to.path === '/admin/login') {
-            next('/admin/dashboard');
+            next('/admin/clients');
             return;
           }
           next();

@@ -33,6 +33,8 @@ export const API_ENDPOINTS = {
     PSYCHOLOGIST_SEARCH_CLIENT: (login: string) => `${BASE_URL}/app/v1/psychologist/search-client?login=${login}`,
     PSYCHOLOGIST_REQUEST_CLIENT: (clientId: number | string) => `${BASE_URL}/app/v1/psychologist/request-client/${clientId}`,
     ADMIN_LOGIN: `${BASE_URL}/app/v1/admin/login`,
+    ADMIN_CLIENTS: (page: number | string, size: number | string) => `${BASE_URL}/app/v1/admin/clients?page=${page}&size=${size}`,
+    ADMIN_CLIENT_DELETE: (clientId: number | string) => `${BASE_URL}/app/v1/admin/client/delete/${clientId}`,
 };
 
 export default API_ENDPOINTS;
