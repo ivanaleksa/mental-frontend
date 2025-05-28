@@ -4,6 +4,7 @@ export const API_ENDPOINTS = {
     REGISTER: `${BASE_URL}/app/v1/user/register`,
     LOGIN: `${BASE_URL}/app/v1/user/login`,
     ME: `${BASE_URL}/app/v1/user/me`,
+    ADMIN_ME: `${BASE_URL}/app/v1/admin/me`,
     RESET_PASSWORD: `${BASE_URL}/app/v1/user/reset-password`,
     RESET_PASSWORD_CONFIRM: `${BASE_URL}/app/v1/user/reset-password/confirm`,
     UPDATE_PHOTO: `${BASE_URL}/app/v1/user/me/photo`,
@@ -30,8 +31,8 @@ export const API_ENDPOINTS = {
     PSYCHOLOGIST_CLIENT_NOTES: (clientId: number | string, page: number | string, size: number | string) => `${BASE_URL}/app/v1/psychologist/clients/${clientId}/notes?page=${page}&size=${size}`,
     PSYCHOLOGIST_REMOVE_CLIENT: (clientId: number | string) => `${BASE_URL}/app/v1/psychologist/client/${clientId}`,
     PSYCHOLOGIST_SEARCH_CLIENT: (login: string) => `${BASE_URL}/app/v1/psychologist/search-client?login=${login}`,
-    PSYCHOLOGIST_REQUEST_CLIENT: (clientId: number | string) => `${BASE_URL}/app/v1/psychologist/request-client/${clientId}`
-
+    PSYCHOLOGIST_REQUEST_CLIENT: (clientId: number | string) => `${BASE_URL}/app/v1/psychologist/request-client/${clientId}`,
+    ADMIN_LOGIN: `${BASE_URL}/app/v1/admin/login`,
 };
 
 export default API_ENDPOINTS;

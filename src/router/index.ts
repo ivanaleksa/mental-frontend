@@ -50,9 +50,19 @@ const routes = [
         component: () => import('../views/Stats.vue'),
     },
     {
-        path: "/clients",
+        path: '/clients',
         name: 'Clients',
         component: () => import('../views/Clients.vue'),
+    },
+    {
+        path: '/admin/login',
+        name: 'AdminLogin',
+        component: () => import('../views/AdminLogin.vue'),
+    },
+    {
+        path: '/admin/dashboard',
+        name: 'Dashboard',
+        component: () => import('../views/AdminDashboard.vue'),
     },
     {
         path: '/:pathMatch(.*)*',
@@ -67,49 +77,80 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
-    const jwtToken = document.cookie
-        .split('; ')
-        .find(row => row.startsWith('jwt_token='))
-        ?.split('=')[1];
+  const jwtToken = document.cookie
+    .split('; ')
+    .find(row => row.startsWith('jwt_token='))
+    ?.split('=')[1];
 
-    if (jwtToken) {
-        try {
-            const response = await axios.get(API_ENDPOINTS.ME, {
-                headers: { Authorization: `Bearer ${jwtToken}` },
-            });
+  if (jwtToken) {
+    if (to.path.startsWith('/admin/')) {
+      try {
+        const response = await axios.get(API_ENDPOINTS.ADMIN_ME, {
+          headers: { Authorization: `Bearer ${jwtToken}` },
+        });
 
-            if (response.data) {
-                if (!response.data.is_verified && to.path !== '/email-confirmation') {
-                    next('/email-confirmation');
-                    return;
-                }
-                if (response.data.is_verified && to.path === '/email-confirmation') {
-                    next('/profile');
-                    return;
-                }
-
-                if (to.path === '/login' || to.path === '/register') {
-                    next('/profile');
-                } else {
-                    next();
-                }
-                return;
-            }
-        } catch (error) {
-            console.error('ME Error:', error);
-            document.cookie = 'jwt_token=; Max-Age=0; path=/';
-            if (to.path !== '/' && to.path !== '/forgot-password') {
-                next('/login');
-            }
+        if (response.data) {
+          if (to.path === '/admin/login') {
+            next('/admin/dashboard');
             return;
+          }
+          next();
+          return;
         }
-    }
-
-    if (to.path !== '/' && to.path !== '/forgot-password' && to.path !== '/login' && to.path !== '/register') {
-        next('/login');
+      } catch (error) {
+        console.error('ADMIN_ME Error:', error);
+        document.cookie = 'jwt_token=; Max-Age=0; path=/';
+        if (to.path !== '/admin/login') {
+          next('/admin/login');
+          return;
+        }
+      }
     } else {
-        next();
+      try {
+        const response = await axios.get(API_ENDPOINTS.ME, {
+          headers: { Authorization: `Bearer ${jwtToken}` },
+        });
+
+        if (response.data) {
+          if (!response.data.is_verified && to.path !== '/email-confirmation') {
+            next('/email-confirmation');
+            return;
+          }
+          if (response.data.is_verified && to.path === '/email-confirmation') {
+            next('/profile');
+            return;
+          }
+
+          if (to.path === '/login' || to.path === '/register') {
+            next('/profile');
+            return;
+          }
+
+          next();
+          return;
+        }
+      } catch (error) {
+        console.error('ME Error:', error);
+        document.cookie = 'jwt_token=; Max-Age=0; path=/';
+        if (to.path !== '/' && to.path !== '/forgot-password') {
+          next('/login');
+          return;
+        }
+      }
     }
+  }
+
+  if (to.path.startsWith('/admin/')) {
+    if (to.path !== '/admin/login') {
+      next('/admin/login');
+      return;
+    }
+  } else if (to.path !== '/' && to.path !== '/forgot-password' && to.path !== '/login' && to.path !== '/register') {
+    next('/login');
+    return;
+  }
+
+  next();
 });
 
 export default router;
