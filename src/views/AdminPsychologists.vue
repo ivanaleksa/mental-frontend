@@ -3,14 +3,14 @@
     <h1 class="title">Mental - Dashboard</h1>
     <div class="admin-content">
       <div class="sidebar">
-        <router-link to="/admin/clients" class="sidebar-item active">Клиенты</router-link>
-        <router-link to="/admin/psychologists" class="sidebar-item">Психологи</router-link>
-        <router-link to="/admin/client-requests" class="sidebar-item">Заявки</router-link>
-        <router-link to="/admin/admins" class="sidebar-item">Администраторы</router-link>
+        <router-link to="/admin/clients" class="sidebar-item">Клиенты</router-link>
+        <router-link to="/admin/psychologists" class="sidebar-item active">Психологи</router-link>
+        <router-link to="/admin/zavkaf" class="sidebar-item">Заявки</router-link>
+        <router-link to="/admin/admin" class="sidebar-item">Администраторы</router-link>
       </div>
 
       <div class="clients-section">
-        <h2>Клиенты</h2>
+        <h2>Психологи</h2>
         <div class="clients-list">
           <div class="client-header">
             <span class="photo-column"></span>
@@ -19,17 +19,17 @@
             <span>Email</span>
             <span>Дата рождения</span>
             <span>Пол</span>
-            <span>Верифицирован</span>
+            <span></span>
             <span class="action-column"></span>
           </div>
-          <div v-for="client in clients" :key="client.client_id" class="client-item">
+          <div v-for="psychologist in psychologists" :key="psychologist.psychologist_id" class="client-item">
             <span class="photo-column">
               <img
-                v-if="client.client_photo && client.client_photo !== 'none'"
-                :src="`${baseUrl}/public/user_photos/${client.client_photo}`"
-                alt="Client Photo"
+                v-if="psychologist.psychologist_photo && psychologist.psychologist_photo !== 'none'"
+                :src="`${baseUrl}/public/user_photos/${psychologist.psychologist_photo}`"
+                alt="Psychologist Photo"
                 class="client-photo"
-                @click="openPhotoModal(`${baseUrl}/public/user_photos/${client.client_photo}`)"
+                @click="openPhotoModal(`${baseUrl}/public/user_photos/${psychologist.psychologist_photo}`)"
               />
               <svg
                 v-else
@@ -46,26 +46,26 @@
                 <path d="M4 20c0-4.4 3.6-8 8-8s8 3.6 8 8"/>
               </svg>
             </span>
-            <span class="cell" :title="client.first_name + ' ' + client.last_name">
-              <strong>{{ client.first_name }} {{ client.last_name }}</strong>
+            <span class="cell" :title="psychologist.first_name + ' ' + psychologist.last_name">
+              <strong>{{ psychologist.first_name }} {{ psychologist.last_name }}</strong>
             </span>
-            <span class="cell" :title="client.login">
-              {{ client.login }}
+            <span class="cell" :title="psychologist.login">
+              {{ psychologist.login }}
             </span>
-            <span class="cell" :title="client.email">
-              {{ client.email }}
+            <span class="cell" :title="psychologist.email">
+              {{ psychologist.email }}
             </span>
-            <span class="cell" :title="formatDate(client.birthAt)">
-              {{ formatDate(client.birthAt) }}
+            <span class="cell" :title="formatDate(psychologist.birthAt)">
+              {{ formatDate(psychologist.birthAt) }}
             </span>
-            <span class="cell" :title="client.sex">
-              {{ client.sex }}
+            <span class="cell" :title="psychologist.sex">
+              {{ psychologist.sex }}
             </span>
-            <span class="cell" :title="client.is_verified ? 'Да' : 'Нет'">
-              {{ client.is_verified ? 'Да' : 'Нет' }}
+            <span class="cell">
+              <button @click="openDocument(psychologist.psychologist_docs)" class="action-button small">Документ</button>
             </span>
             <span class="action-column">
-              <button @click="confirmDelete(client.client_id)" class="action-button small reject">Удалить</button>
+              <button @click="confirmDelete(psychologist.psychologist_id)" class="action-button small reject">Удалить</button>
             </span>
           </div>
         </div>
@@ -80,9 +80,9 @@
     <div v-if="showDeleteModal" class="modal">
       <div class="modal-content" style="color: #1a1a1a;">
         <h3>Подтверждение удаления</h3>
-        <p>Вы уверены, что хотите удалить клиента?</p>
+        <p>Вы уверены, что хотите удалить психолога?</p>
         <div class="modal-actions">
-          <button @click="deleteClient" class="action-button">Да</button>
+          <button @click="deletePsychologist" class="action-button">Да</button>
           <button @click="closeDeleteModal" class="action-button" style="background: #1a1a1a">Нет</button>
         </div>
       </div>
@@ -90,7 +90,7 @@
 
     <div v-if="showPhotoModal" class="modal" @click="closePhotoModal">
       <div class="modal-content photo-modal" @click.stop>
-        <button class="close-button" @click="closePhotoModal">×</button>
+        <button class="close-button" @click="closePhotoModal">&times;</button>
         <img :src="selectedPhoto" alt="Enlarged Photo" class="enlarged-photo" />
       </div>
     </div>
@@ -103,14 +103,14 @@ import axios from 'axios';
 import { BASE_URL, API_ENDPOINTS } from '../config/api';
 
 export default defineComponent({
-  name: 'AdminClients',
+  name: 'AdminPsychologists',
   data() {
     return {
-      clients: [] as { client_id: number; login: string; email: string; first_name: string; last_name: string; birthAt: string; sex: string; client_photo: string; is_verified: boolean }[],
-      totalClients: 0,
+      psychologists: [] as { psychologist_id: number; login: string; email: string; first_name: string; last_name: string; birthAt: string; sex: string; psychologist_photo: string; psychologist_docs: string }[],
+      totalPsychologists: 0,
       currentPage: 1,
       pageSize: 10,
-      clientToDelete: null as number | null,
+      psychologistToDelete: null as number | null,
       showDeleteModal: false,
       showPhotoModal: false,
       selectedPhoto: '' as string,
@@ -121,58 +121,61 @@ export default defineComponent({
       return BASE_URL;
     },
     totalPages(): number {
-      return Math.ceil(this.totalClients / this.pageSize);
+      return Math.ceil(this.totalPsychologists / this.pageSize);
     },
   },
   watch: {
     currentPage() {
-      this.fetchClients();
+      this.fetchPsychologists();
     },
   },
   mounted() {
-    this.fetchClients();
+    this.fetchPsychologists();
   },
   methods: {
     formatDate(dateString: string): string {
       return new Date(dateString).toLocaleDateString('ru-RU');
     },
-    async fetchClients() {
+    async fetchPsychologists() {
       const jwtToken = document.cookie.split('; ').find(row => row.startsWith('jwt_token='))?.split('=')[1];
       if (jwtToken) {
         try {
-          const response = await axios.get(`${API_ENDPOINTS.ADMIN_CLIENTS(this.currentPage, this.pageSize)}`, {
+          const response = await axios.get(`${API_ENDPOINTS.ADMIN_PSYCHOLOGISTS(this.currentPage, this.pageSize)}`, {
             headers: { Authorization: `Bearer ${jwtToken}` },
           });
-          this.clients = response.data.items;
-          this.totalClients = response.data.total;
+          this.psychologists = response.data.items;
+          this.totalPsychologists = response.data.total;
         } catch (error) {
-          console.error('Ошибка загрузки списка клиентов:', error);
+          console.error('Ошибка загрузки списка психологов:', error);
         }
       }
     },
-    confirmDelete(clientId: number) {
-      this.clientToDelete = clientId;
+    confirmDelete(psychologistId: number) {
+      this.psychologistToDelete = psychologistId;
       this.showDeleteModal = true;
     },
     closeDeleteModal() {
-      this.clientToDelete = null;
+      this.psychologistToDelete = null;
       this.showDeleteModal = false;
     },
-    async deleteClient() {
-      if (this.clientToDelete) {
+    async deletePsychologist() {
+      if (this.psychologistToDelete) {
         const jwtToken = document.cookie.split('; ').find(row => row.startsWith('jwt_token='))?.split('=')[1];
         if (jwtToken) {
           try {
-            await axios.delete(`${API_ENDPOINTS.ADMIN_CLIENT_DELETE(this.clientToDelete)}`, {
+            await axios.delete(`${API_ENDPOINTS.ADMIN_PSYCHOLOGIST_DELETE(this.psychologistToDelete)}`, {
               headers: { Authorization: `Bearer ${jwtToken}` },
             });
-            this.fetchClients();
+            this.fetchPsychologists();
             this.closeDeleteModal();
           } catch (error) {
-            console.error('Ошибка удаления клиента:', error);
+            console.error('Ошибка удаления психолога:', error);
           }
         }
       }
+    },
+    openDocument(docPath: string) {
+      window.open(`${this.baseUrl}/public/${docPath}`, '_blank');
     },
     openPhotoModal(photoUrl: string) {
       this.selectedPhoto = photoUrl;
@@ -353,6 +356,7 @@ export default defineComponent({
   max-width: 400px;
   width: 100%;
   text-align: center;
+  position: relative;
 }
 
 .modal-content.photo-modal {

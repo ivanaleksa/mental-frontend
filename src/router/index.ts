@@ -65,6 +65,11 @@ const routes = [
         component: () => import('../views/AdminClients.vue'),
     },
     {
+        path: '/admin/psychologists',
+        name: 'AdminPsychologists',
+        component: () => import('../views/AdminPsychologists.vue'),
+    },
+    {
         path: '/:pathMatch(.*)*',
         name: 'NotFound',
         component: () => import('../views/NotFound.vue'),
