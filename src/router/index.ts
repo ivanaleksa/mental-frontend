@@ -70,6 +70,11 @@ const routes = [
         component: () => import('../views/AdminPsychologists.vue'),
     },
     {
+        path: '/admin/client-requests',
+        name: 'AdminClientRequests',
+        component: () => import('../views/AdminClientRequests.vue'),
+    },
+    {
         path: '/:pathMatch(.*)*',
         name: 'NotFound',
         component: () => import('../views/NotFound.vue'),

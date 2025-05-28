@@ -79,7 +79,7 @@
           </div>
           <p v-else>Нет заявок</p>
         </div>
-        <!-- Модальное окно для смены пароля -->
+
         <div v-if="showChangePasswordDialog" class="modal">
           <div class="modal-content">
             <h3>Смена пароля</h3>
@@ -92,7 +92,7 @@
             <p v-if="successMessage" class="success">{{ successMessage }}</p>
           </div>
         </div>
-        <!-- Модальное окно для подачи документов -->
+
         <div v-if="showApplyDialog" class="modal">
           <div class="modal-content">
             <h3>Подать документы</h3>
@@ -102,18 +102,18 @@
             <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
           </div>
         </div>
-        <!-- Модальное окно для повторной подачи документов -->
+
         <div v-if="showRejectedApplyDialog" class="modal">
           <div class="modal-content">
             <h3>Повторная подача документов</h3>
-            <p>Причина отклонения: {{ requestStatus.rejection_reason }}</p>
+            <p style="color: #1a1a1a;">Причина отклонения: {{ requestStatus.rejection_reason }}</p>
             <input type="file" @change="handleRejectedApplyUpload" ref="rejectedApplyFileInput" />
             <button @click="submitRejectedApplication">Сохранить</button>
             <button @click="closeRejectedApplyDialog">Закрыть</button>
             <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
           </div>
         </div>
-        <!-- Модальное окно для подтверждения выхода из статуса психолога -->
+
         <div v-if="showRevertToClientDialog" class="modal">
           <div class="modal-content">
             <h3>Подтверждение</h3>

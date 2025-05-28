@@ -5,7 +5,7 @@
       <div class="sidebar">
         <router-link to="/admin/clients" class="sidebar-item">Клиенты</router-link>
         <router-link to="/admin/psychologists" class="sidebar-item active">Психологи</router-link>
-        <router-link to="/admin/zavkaf" class="sidebar-item">Заявки</router-link>
+        <router-link to="/admin/client-requests" class="sidebar-item">Заявки</router-link>
         <router-link to="/admin/admin" class="sidebar-item">Администраторы</router-link>
       </div>
 
