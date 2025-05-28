@@ -4,6 +4,7 @@
     <div class="profile-content">
       <div class="sidebar">
         <router-link to="/profile" class="sidebar-item active">Профиль</router-link>
+        <router-link v-if="userData.user_type === 'психолог'" to="/clients" class="sidebar-item">Клиенты</router-link>
         <router-link v-if="userData.user_type === 'клиент'" to="/notes" class="sidebar-item">Управление записками</router-link>
         <router-link v-if="userData.user_type === 'клиент'" to="/stats" class="sidebar-item">Статистика</router-link>
         <router-link v-if="userData.user_type === 'клиент'" to="/psychologists" class="sidebar-item">Список психологов</router-link>
@@ -15,7 +16,7 @@
             <button v-if="userData.user_type === 'клиент' && !requestStatus.has_application" class="action-button" @click="openApplyDialog">Подать документы</button>
             <p v-else-if="userData.user_type === 'клиент' && requestStatus.has_application && requestStatus.status === 'ожидание'" class="status-message" style="color: #333">Ожидание проверки документа</p>
             <button v-else-if="userData.user_type === 'клиент' && requestStatus.has_application && requestStatus.status === 'отвергнут'" class="action-button rejected" @click="openRejectedApplyDialog">{{ requestStatus.rejection_reason || 'Отвергнуто' }}</button>
-            <button v-else class="action-button" @click="alert('Выйти из статуса психолога')">Выйти из статуса психолога</button>
+            <button v-else class="action-button" @click="openRevertToClientDialog">Выйти из статуса психолога</button>
             <button class="action-button logout" @click="logout">Выйти</button>
           </div>
           <div class="profile-details">
@@ -24,7 +25,7 @@
                 <div v-if="!userData.client_photo || userData.client_photo === 'none'" class="photo-placeholder">
                   Ваше фото здесь
                 </div>
-                <img v-else :src="`http://127.0.0.1:8000/public/user_photos/${userData.client_photo}`" alt="Profile Photo" class="profile-photo" />
+                <img v-else :src="`${baseUrl}/public/user_photos/${userData.client_photo}`" alt="Profile Photo" class="profile-photo" />
               </button>
               <p class="photo-hint">Нажмите, чтобы изменить фото</p>
             </div>
@@ -55,7 +56,7 @@
           <h2>Заявки от психологов</h2>
           <div v-if="userData.user_type === 'клиент' && psychologistRequests.length" class="requests-list">
             <div v-for="request in psychologistRequests" :key="request.request_id" class="request-item">
-              <img :src="request.psychologist_photo ? `http://127.0.0.1:8000/public/user_photos/${request.psychologist_photo}` : 'https://via.placeholder.com/50'" alt="Psychologist Photo" class="request-photo" />
+              <img :src="request.psychologist_photo ? `${baseUrl}/public/user_photos/${request.psychologist_photo}` : 'https://via.placeholder.com/50'" alt="Psychologist Photo" class="request-photo" />
               <div>
                 <p><strong>{{ request.first_name }} {{ request.last_name }}</strong></p>
                 <p>Логин: {{ request.login }}</p>
@@ -70,7 +71,8 @@
             <button @click="openPdf" class="action-button">Открыть PDF</button>
             <div v-if="showPdf" class="pdf-modal">
               <div class="pdf-content">
-                <iframe :src="'https://example.com/sample.pdf'" width="100%" height="600px"></iframe>
+                <p v-if="!pdfUrl" class="error">Документа нет</p>
+                <iframe v-else :src="pdfUrl" width="100%" height="600px"></iframe>
                 <button @click="closePdf">Закрыть</button>
               </div>
             </div>
@@ -111,6 +113,15 @@
             <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
           </div>
         </div>
+        <!-- Модальное окно для подтверждения выхода из статуса психолога -->
+        <div v-if="showRevertToClientDialog" class="modal">
+          <div class="modal-content">
+            <h3>Подтверждение</h3>
+            <p style="color: #333;">Вы уверены, что хотите выйти из статуса психолога?<br>Это действие удалит ваш статус и переведёт вас в статус клиента.</p>
+            <button @click="revertToClient">Подтвердить</button>
+            <button @click="closeRevertToClientDialog" style="background-color: #333;">Отмена</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -119,7 +130,7 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import axios from 'axios';
-import API_ENDPOINTS from '../config/api';
+import { BASE_URL, API_ENDPOINTS } from '../config/api';
 
 export default defineComponent({
   name: 'Profile',
@@ -149,6 +160,7 @@ export default defineComponent({
       showChangePasswordDialog: false,
       showApplyDialog: false,
       showRejectedApplyDialog: false,
+      showRevertToClientDialog: false,
       passwordData: {
         user_id: 0,
         user_type: 'клиент',
@@ -163,7 +175,15 @@ export default defineComponent({
       },
       errorMessage: '',
       successMessage: '',
+      applyFile: null as File | null,
+      rejectedApplyFile: null as File | null,
+      pdfUrl: '',
     };
+  },
+  computed: {
+    baseUrl(): string {
+      return BASE_URL;
+    },
   },
   mounted() {
     this.fetchUserData();
@@ -195,6 +215,7 @@ export default defineComponent({
             headers: { Authorization: `Bearer ${jwtToken}` },
           });
           this.psychologistRequests = response.data.requests;
+          console.log(this.psychologistRequests);
         } catch (error) {
           this.errorMessage = 'Ошибка загрузки заявок';
           console.error(error);
@@ -212,6 +233,22 @@ export default defineComponent({
         } catch (error) {
           this.errorMessage = 'Ошибка проверки статуса заявки';
           console.error(error);
+        }
+      }
+    },
+    async fetchDocumentPath() {
+      const jwtToken = document.cookie.split('; ').find(row => row.startsWith('jwt_token='))?.split('=')[1];
+      if (jwtToken) {
+        try {
+          const response = await axios.get(API_ENDPOINTS.PSYCHOLOGIST_DOCUMENT, {
+            headers: { Authorization: `Bearer ${jwtToken}` },
+          });
+          const documentPath = response.data.document_path;
+          this.pdfUrl = documentPath ? `${BASE_URL}${documentPath}` : '';
+        } catch (error) {
+          this.errorMessage = 'Ошибка получения пути к документу';
+          console.error(error);
+          this.pdfUrl = '';
         }
       }
     },
@@ -296,6 +333,7 @@ export default defineComponent({
       }
     },
     openPdf() {
+      this.fetchDocumentPath();
       this.showPdf = true;
     },
     closePdf() {
@@ -417,6 +455,28 @@ export default defineComponent({
         } catch (error) {
           this.errorMessage = 'Ошибка подачи заявки: ' + (error.response?.data?.detail || 'Попробуйте снова');
           console.error(error);
+        }
+      }
+    },
+    openRevertToClientDialog() {
+      this.showRevertToClientDialog = true;
+    },
+    closeRevertToClientDialog() {
+      this.showRevertToClientDialog = false;
+    },
+    async revertToClient() {
+      const jwtToken = document.cookie.split('; ').find(row => row.startsWith('jwt_token='))?.split('=')[1];
+      if (jwtToken) {
+        try {
+          await axios.patch(API_ENDPOINTS.REVERT_TO_CLIENT, {}, {
+            headers: { Authorization: `Bearer ${jwtToken}` },
+          });
+          document.cookie = 'jwt_token=; Max-Age=0; path=/';
+          window.location.reload();
+        } catch (error) {
+          this.errorMessage = 'Ошибка смены статуса: ' + (error.response?.data?.detail || 'Попробуйте снова');
+          console.error(error);
+          this.closeRevertToClientDialog();
         }
       }
     },

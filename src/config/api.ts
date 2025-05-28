@@ -1,4 +1,4 @@
-const BASE_URL = 'http://127.0.0.1:8000';
+export const BASE_URL = 'http://127.0.0.1:8000';
 
 export const API_ENDPOINTS = {
     REGISTER: `${BASE_URL}/app/v1/user/register`,
@@ -23,7 +23,15 @@ export const API_ENDPOINTS = {
     NOTE_UPDATE: (noteId: number | string) => `${BASE_URL}/app/v1/note/update/${noteId}`,
     NOTE_DELETE: (noteId: number | string) => `${BASE_URL}/app/v1/note/delete/${noteId}`,
     EMAIL_CONFIRM: `${BASE_URL}/app/v1/email/confirm`,
-    EMAIL_SEND_NEW: `${BASE_URL}/app/v1/email/send-new`
+    EMAIL_SEND_NEW: `${BASE_URL}/app/v1/email/send-new`,
+    REVERT_TO_CLIENT: `${BASE_URL}/app/v1/psychologist/revert-to-client`,
+    PSYCHOLOGIST_DOCUMENT: `${BASE_URL}/app/v1/psychologist/document`,
+    PSYCHOLOGIST_CLIENTS: (page: number | string, size: number | string) => `${BASE_URL}/app/v1/psychologist/clients?page=${page}&size=${size}`,
+    PSYCHOLOGIST_CLIENT_NOTES: (clientId: number | string, page: number | string, size: number | string) => `${BASE_URL}/app/v1/psychologist/clients/${clientId}/notes?page=${page}&size=${size}`,
+    PSYCHOLOGIST_REMOVE_CLIENT: (clientId: number | string) => `${BASE_URL}/app/v1/psychologist/client/${clientId}`,
+    PSYCHOLOGIST_SEARCH_CLIENT: (login: string) => `${BASE_URL}/app/v1/psychologist/search-client?login=${login}`,
+    PSYCHOLOGIST_REQUEST_CLIENT: (clientId: number | string) => `${BASE_URL}/app/v1/psychologist/request-client/${clientId}`
+
 };
 
 export default API_ENDPOINTS;
