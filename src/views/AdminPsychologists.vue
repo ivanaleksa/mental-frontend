@@ -175,7 +175,7 @@ export default defineComponent({
       }
     },
     openDocument(docPath: string) {
-      window.open(`${this.baseUrl}/public/${docPath}`, '_blank');
+      window.open(`${this.baseUrl}/public/client_documents/${docPath}`, '_blank');
     },
     openPhotoModal(photoUrl: string) {
       this.selectedPhoto = photoUrl;

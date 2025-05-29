@@ -157,7 +157,7 @@ export default defineComponent({
       this.rejectionReason = '';
     },
     openDocument(docPath: string) {
-      window.open(`${this.baseUrl}/public/${docPath}`, '_blank');
+      window.open(`${this.baseUrl}/public/client_documents/${docPath}`, '_blank');
     },
   },
 });

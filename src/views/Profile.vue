@@ -244,7 +244,7 @@ export default defineComponent({
             headers: { Authorization: `Bearer ${jwtToken}` },
           });
           const documentPath = response.data.document_path;
-          this.pdfUrl = documentPath ? `${BASE_URL}${documentPath}` : '';
+          this.pdfUrl = documentPath ? `${BASE_URL}/public/client_documents/${documentPath}` : '';
         } catch (error) {
           this.errorMessage = 'Ошибка получения пути к документу';
           console.error(error);
