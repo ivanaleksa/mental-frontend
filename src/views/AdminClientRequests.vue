@@ -13,18 +13,13 @@
         <h2>Заявки</h2>
         <div class="clients-list">
           <div class="client-header">
-            <span>ID заявки</span>
             <span>ID клиента</span>
             <span>Документ</span>
             <span>Статус</span>
             <span>Дата создания</span>
             <span class="action-column">Действия</span>
           </div>
-          <!-- Данные заявок -->
           <div v-for="request in requests" :key="request.request_id" class="client-item">
-            <span class="cell" :title="request.request_id.toString()">
-              {{ request.request_id }}
-            </span>
             <span class="cell" :title="request.client_id.toString()">
               {{ request.client_id }}
             </span>
@@ -43,14 +38,14 @@
                 class="action-button small accept"
                 :disabled="request.status !== 'ожидание'"
               >
-                Принять
+                &#10004
               </button>
               <button
                 @click="confirmReject(request.request_id)"
                 class="action-button small reject"
                 :disabled="request.status !== 'ожидание'"
               >
-                Отвергнуть
+                &#10006
               </button>
             </span>
           </div>
