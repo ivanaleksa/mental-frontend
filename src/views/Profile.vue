@@ -53,7 +53,7 @@
           </div>
         </div>
         <div class="requests-section">
-          <h2>Заявки от психологов</h2>
+          <h2 v-if="userData.user_type === 'клиент'">Заявки от психологов</h2>
           <div v-if="userData.user_type === 'клиент' && psychologistRequests.length" class="requests-list">
             <div v-for="request in psychologistRequests" :key="request.request_id" class="request-item">
               <img :src="request.psychologist_photo ? `${baseUrl}/public/user_photos/${request.psychologist_photo}` : 'https://via.placeholder.com/50'" alt="Psychologist Photo" class="request-photo" />
