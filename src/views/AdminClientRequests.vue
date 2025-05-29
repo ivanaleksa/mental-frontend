@@ -34,7 +34,7 @@
             </span>
             <span class="action-column">
               <button
-                @click="updateRequestStatus(request.request_id, 'принять', '')"
+                @click="updateRequestStatus(request.request_id, 'подвержден', '')"
                 class="action-button small accept"
                 :disabled="request.status !== 'ожидание'"
               >
