@@ -68,7 +68,7 @@ export default defineComponent({
         this.showNotificationMessage('Почта успешно подтверждена! Скоро вы будете перенаправлены', 'success');
         setTimeout(() => {
           this.$router.push('/profile');
-        }, 2000); // Редирект на /profile через 2 секунды после успешного подтверждения
+        }, 2000); // redirect to /profile after 2 seconds
       } catch (error) {
         this.showNotificationMessage('Ошибка подтверждения: ' + (error.response?.data?.detail || 'Попробуйте снова'), 'error');
         console.error('Ошибка подтверждения почты:', error);

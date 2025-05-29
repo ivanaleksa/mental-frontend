@@ -110,9 +110,9 @@ export default defineComponent({
     };
 
     const chartColors = [
-      '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f',
-      '#bcbd22', '#17becf', '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b',
-      '#e377c2', '#7f7f7f'
+      '#FFA500', '#FF0000', '#FF4500', '#C71585', '#FF69B4', '#808080', '#00FFFF', '#DAA520',
+      '#32CD32', '#FFD700', '#4682B4', '#00FF00', '#9ACD32', '#DEB887', '#FF6347', '#0000FF',
+      '#7FFFD4', '#800080'
     ];
 
     const notes = ref([]);
@@ -157,7 +157,7 @@ export default defineComponent({
         sunday.setDate(monday.getDate() + 6);
         endDate = sunday.toISOString().split('T')[0];
       } else if (selectedPeriod.value === 'Time of Day') {
-        const date = new Date(selectedDate.value); // Используем selectedDate для Time of Day
+        const date = new Date(selectedDate.value); // selectedDate for Time of Day
         const day = date.getDay();
         const diffToMonday = date.getDate() - day + (day === 0 ? -6 : 1);
         const monday = new Date(date.setDate(diffToMonday));
@@ -176,19 +176,17 @@ export default defineComponent({
 
       await fetchNotes(startDate, endDate);
 
-      // Уничтожаем предыдущий график
+      // destroy the previous chart
       if (chartInstance.value) {
         chartInstance.value.destroy();
         chartInstance.value = null;
       }
 
-      // Проверяем наличие канваса
       if (!chartCanvas.value) {
         console.error('Канвас не найден при попытке построить график');
         return;
       }
 
-      // Очищаем канвас
       const ctx = chartCanvas.value.getContext('2d');
       if (!ctx) {
         console.error('Контекст канваса не найден');

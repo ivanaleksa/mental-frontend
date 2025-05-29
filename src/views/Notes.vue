@@ -42,7 +42,6 @@
             <button v-else @click="createNewNote" class="action-button add">Добавить заметку</button>
           </div>
         </div>
-        <!-- Диалоговые окна -->
         <div v-if="showFilterDialog" class="modal">
           <div class="modal-content">
             <h3>Фильтр</h3>
@@ -97,7 +96,6 @@
         <div v-if="isLoading" class="loader-overlay">
           <div class="loader"></div>
         </div>
-        <!-- Всплывающее уведомление -->
         <div v-if="showNotification" class="notification" :class="{ 'success': notificationType === 'success', 'error': notificationType === 'error' }">
           {{ notificationMessage }}
         </div>

@@ -5,13 +5,11 @@
       <button @click="openRequestModal" class="action-button">Отправить запрос</button>
     </div>
     <div class="clients-content">
-      <!-- Главное меню -->
       <div class="sidebar">
         <router-link to="/profile" class="sidebar-item">Профиль</router-link>
         <router-link to="/clients" class="sidebar-item active">Клиенты</router-link>
       </div>
 
-      <!-- Список клиентов -->
       <div class="clients-list-section">
         <h2>Список клиентов</h2>
         <div class="clients-list">
@@ -24,7 +22,6 @@
             <button @click.stop="removeClient(client.client_id)" class="action-button small reject">Удалить</button>
           </div>
         </div>
-        <!-- Пагинация -->
         <div class="pagination">
           <button :disabled="currentPage === 1" @click="currentPage--">Предыдущая</button>
           <span>Страница {{ currentPage }} из {{ totalPages }}</span>
@@ -32,7 +29,6 @@
         </div>
       </div>
 
-      <!-- Список заметок клиента -->
       <div class="notes-section">
         <h2>Заметки клиента</h2>
         <div v-if="!selectedClient" class="empty-message">
@@ -46,7 +42,6 @@
             </div>
           </div>
           <p v-else>Заметок нет</p>
-          <!-- Пагинация для заметок -->
           <div v-if="clientNotes.length" class="pagination">
             <button :disabled="currentNotesPage === 1" @click="currentNotesPage--">Предыдущая</button>
             <span>Страница {{ currentNotesPage }} из {{ totalNotesPages }}</span>
@@ -55,7 +50,6 @@
         </div>
       </div>
 
-      <!-- Модальное окно для просмотра заметки -->
       <div v-if="showNoteModal" class="modal">
         <div class="modal-content">
           <h3>{{ selectedNote.title }}</h3>
@@ -67,7 +61,6 @@
         </div>
       </div>
 
-      <!-- Модальное окно для поиска и отправки запроса -->
       <div v-if="showRequestModal" class="modal">
         <div class="modal-content">
           <h3>Поиск клиента</h3>
@@ -76,7 +69,6 @@
             <button @click="searchClient" class="action-button">Поиск</button>
           </div>
 
-          <!-- Результаты поиска -->
           <div v-if="searchPerformed" class="search-results">
             <div v-if="foundClient" class="client-item">
               <img :src="foundClient.client_photo && foundClient.client_photo !== 'none' ? `${baseUrl}/public/user_photos/${foundClient.client_photo}` : 'https://via.placeholder.com/50'" alt="Client Photo" class="client-photo" />
@@ -91,7 +83,6 @@
 
           <button @click="closeRequestModal" style="background: #1a1a1a">Закрыть</button>
 
-          <!-- Уведомление об ошибке или успехе -->
           <div v-if="notificationMessage" class="notification" :class="{ error: isError, success: !isError }">
             {{ notificationMessage }}
           </div>

@@ -4,7 +4,6 @@
       <h1>Регистрация</h1>
 
       <div class="form-grid">
-        <!-- Столбец 1: Логин, Email, Имя, Фамилия -->
         <div class="column">
           <div class="form-group">
             <label for="login">Логин</label>
@@ -48,7 +47,6 @@
           </div>
         </div>
 
-        <!-- Столбец 2: Пароль, Подтверждение пароля -->
         <div class="column">
           <div class="form-group">
             <label for="password">Пароль</label>
@@ -73,7 +71,6 @@
           </div>
         </div>
 
-        <!-- Столбец 3: Дата рождения, Пол -->
         <div class="column">
           <div class="form-group">
             <label for="birthAt">Дата рождения</label>
